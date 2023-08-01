@@ -1,6 +1,6 @@
-Ffcutter is used to cut mp4 files into 30 second chunks. 
+Ffcutter cuts mp4 or mp3 files  into 30 second chunks. 
 
-Right after the chunk creation, it converts it to mp3, so as to be
+In the case of mp4, right after the chunk creation, it converts it to mp3, so as to be
 given as an input audio to audiocraft. Then it deletes the intermediate file.
 
 With every chunk it creates, it increases the counter of the chunked mp3 filename.
