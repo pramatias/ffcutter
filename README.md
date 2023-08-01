@@ -23,7 +23,6 @@ build from source:
 
 ```bash
 
-rustc main.rs
-mv main ffcutter
+cargo build --release
 
 ```
