@@ -49,15 +49,6 @@ fn main() {
     } else {
         println!("Error: Unsupported file format. Supported formats: mp4, mp3");
     }
-
-    // Call the function to convert the video to audio (MP3) and delete the original video
-    if let Err(error) = convert_to_audio_and_delete(filename) {
-        println!("Error: {}", error);
-    } else {
-        println!(
-            "Video successfully converted to audio (MP3) of 30 secs",
-        );
-    }
 }
 
 fn cut_video(filename: &str, number: i32) -> Result<(), String> {
@@ -77,12 +68,23 @@ fn cut_video(filename: &str, number: i32) -> Result<(), String> {
         .status()
         .map_err(|_| "Failed to execute FFmpeg command.")?;
 
+    // Call the function to convert the video to audio (MP3) and delete the original video
+    if let Err(error) = convert_to_audio_and_delete(filename) {
+        println!("Error: {}", error);
+    } else {
+        println!(
+            "Video successfully converted to audio (MP3) of 30 secs",
+        );
+    }
+
     // Check if the FFmpeg command was successful
     if status.success() {
         Ok(())
     } else {
         Err("FFmpeg command failed.".to_string())
     }
+
+
 }
 
 fn convert_to_audio_and_delete(filename: &str) -> Result<(), String> {
