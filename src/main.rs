@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 use std::process::Command;
+use shell_words::quote;
 
 fn main() {
     // Get command line arguments
@@ -32,13 +33,21 @@ fn main() {
         }
     };
 
-    println!("Filename is: {} and number is {}", filename, number);
-
-    // Call the function to cut the video using FFmpeg
-    if let Err(error) = cut_video(filename, number) {
-        println!("Error: {}", error);
+    // Call the general cut function based on the file type
+    if filename.to_lowercase().ends_with(".mp4") {
+        if let Err(error) = cut(filename, number, cut_video) {
+            println!("Error: {}", error);
+        } else {
+            println!("Video successfully cut and saved as '{}_out.mp4'", filename);
+        }
+    } else if filename.to_lowercase().ends_with(".mp3") {
+        if let Err(error) = cut(filename, number, cut_mp3) {
+            println!("Error: {}", error);
+        } else {
+            println!("Audio successfully cut and saved as '{}_out.mp3'", filename);
+        }
     } else {
-        println!("Video successfully cut and saved as '{}_out.mp4'", filename);
+        println!("Error: Unsupported file format. Supported formats: mp4, mp3");
     }
 
     // Call the function to convert the video to audio (MP3) and delete the original video
@@ -116,4 +125,48 @@ fn convert_to_audio_and_delete(filename: &str) -> Result<(), String> {
     println!("Mp3 file {} successfully created", output_filename);
 
     Ok(())
+}
+
+fn cut_mp3(filename: &str, number: i32) -> Result<(), String> {
+    let mut output_filename = format!("{}", filename);
+
+    // Check if the output filename already exists, if yes, add a number to make it unique
+    let mut number = 1;
+    while std::path::Path::new(&output_filename).exists() {
+        output_filename = format!("{}_{}.mp3", filename.trim_end_matches(".mp3"), number);
+        number += 1;
+    }
+
+    // Escape the filenames for use in the FFmpeg command
+    let escaped_input_filename = quote(filename);
+    let escaped_output_filename = quote(&output_filename);
+
+    // Prepare the FFmpeg command to cut the mp3
+    let ffmpeg_cmd = format!(
+        "ffmpeg -i {} -ss {} -t 30 -c:v copy -c:a copy {}",
+        escaped_input_filename, number, escaped_output_filename
+    );
+
+    println!("FFmpeg command {}", ffmpeg_cmd);
+
+    // Run the FFmpeg command as an external process
+    let status = Command::new("sh")
+        .arg("-c")
+        .arg(&ffmpeg_cmd)
+        .status()
+        .map_err(|_| "Failed to execute FFmpeg command.")?;
+
+    // Check if the FFmpeg command was successful
+    if status.success() {
+        Ok(())
+    } else {
+        Err("FFmpeg command failed.".to_string())
+    }
+}
+
+fn cut<F>(filename: &str, number: i32, cut_function: F) -> Result<(), String>
+where
+    F: Fn(&str, i32) -> Result<(), String>,
+{
+    cut_function(filename, number)
 }
