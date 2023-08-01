@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 description = "Cuts mp4 or mp3 to 30 seconds to be given as a melody source to audiocraft"
 repository = "https://github.com/pramatias/ffcutter"
 readme = "README.md"
-keywords = ["audiocraft", "audio processing", "command-line-utilities"]
+keywords = ["audiocraft", "audio-processing", "command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
